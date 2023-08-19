@@ -47,5 +47,3 @@ Here's a quick guide on how to set up and run the project using Docker commands:
 Your enthusiasm and involvement in this project are immensely appreciated. Let's collaborate to revolutionize social media management, one commit at a time!
 
 ---
-
-Feel free to adapt this text to your preferences and requirements. Your project's vision and technical details are now conveyed more comprehensively, inviting developers to join your journey. Good luck with your project!
