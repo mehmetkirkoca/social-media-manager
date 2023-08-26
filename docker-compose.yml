@@ -11,13 +11,15 @@ services:
     networks:
       - socialMediaManagerNetwork
     depends_on:
+      - messageBroker
       - gateway
       - ui
 
   messageBroker:
-    image: rabbitmq
-    depends_on:
-      - gateway
+    image: rabbitmq:management
+    environment:
+      RABBITMQ_DEFAULT_USER: username
+      RABBITMQ_DEFAULT_PASS: password
     container_name: messageBroker
     restart: unless-stopped
     ports:
@@ -33,14 +35,17 @@ services:
     networks:
       - socialMediaManagerNetwork
     depends_on:
-      - twitter
+      - messageBroker
 
   twitter:
     build: ./services/twitter
     volumes:
       - ./services/twitter:/services/twitter
+    restart: unless-stopped
     networks:
       - socialMediaManagerNetwork
+    depends_on:
+      - messageBroker
 
   ui:
     build: ./ui

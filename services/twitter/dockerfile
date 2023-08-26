@@ -1,6 +1,6 @@
 FROM node:current-alpine3.17
 
-WORKDIR /app/services/twitter
+WORKDIR /services/twitter
 
 COPY package*.json ./
 
