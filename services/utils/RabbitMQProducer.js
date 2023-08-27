@@ -1,10 +1,12 @@
 const amqp = require('amqplib');
 
-class RabbitMQWrapper {
-  constructor(connectionURL) {
-    this.connectionURL = connectionURL;
+class RabbitMQProducer {
+  
+  constructor() {
+    this.connectionURL = 'amqp://username:password@messageBroker';
     this.connection = null;
     this.channel = null;
+    this.connect();
   }
 
   async connect() {
@@ -26,6 +28,15 @@ class RabbitMQWrapper {
       console.error(`Error publishing to ${queueName}:`, error);
     }
   }
+  
+  async sendMessage(queueName, message) {
+    try {
+      await this.publishToQueue(queueName, message);
+    } catch (error) {
+      console.error('Error sending message:', error.message);
+    }
+  }
+
 }
 
-module.exports = RabbitMQWrapper;
+module.exports = RabbitMQProducer;

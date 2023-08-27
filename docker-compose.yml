@@ -32,6 +32,18 @@ services:
     build: ./services/gateway
     volumes:
       - ./services/gateway:/services/gateway
+      - ./services/utils:/services/gateway/utils
+    networks:
+      - socialMediaManagerNetwork
+    depends_on:
+      - messageBroker
+
+  formatter:
+    build: ./services/formatter
+    volumes:
+      - ./services/formatter:/services/formatter
+      - ./services/utils:/services/formatter/utils
+    restart: unless-stopped
     networks:
       - socialMediaManagerNetwork
     depends_on:
@@ -41,6 +53,18 @@ services:
     build: ./services/twitter
     volumes:
       - ./services/twitter:/services/twitter
+      - ./services/utils:/services/twitter/utils
+    restart: unless-stopped
+    networks:
+      - socialMediaManagerNetwork
+    depends_on:
+      - messageBroker
+      
+  linkedin:
+    build: ./services/linkedin
+    volumes:
+      - ./services/linkedin:/services/linkedin
+      - ./services/utils:/services/linkedin/utils
     restart: unless-stopped
     networks:
       - socialMediaManagerNetwork

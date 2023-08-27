@@ -1,9 +1,10 @@
 const fastify = require('fastify')();
-const sendTestMessage = require('./utils');
+const RabbitMQProducer = require('./utils/RabbitMQProducer');
+let rabbitMQProducer = new RabbitMQProducer();
 
 fastify.post('/', async (request, reply) => {
   try {
-    sendTestMessage(request.body.message);
+    await rabbitMQProducer.sendMessage('formatter', request.body.message);
     reply.send({ status: 'Message Send' });
   } catch (error) {
     console.error('Error handling POST request:', error);
