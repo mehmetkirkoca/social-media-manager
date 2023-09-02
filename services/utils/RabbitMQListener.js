@@ -8,7 +8,6 @@ class RabbitMQListener {
   async listenToQueue(queueName, callback) {
     try {
       await this.rabbitmq.consumeFromQueue(queueName, async (message) => {
-        // Process the message
         await callback(message);
       });
     } catch (error) {

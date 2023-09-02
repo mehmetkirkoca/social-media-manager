@@ -22,8 +22,10 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, onMounted } from 'vue';
 import axios from 'axios';
+import { io } from 'socket.io-client';
+const socket = io();
 
 const message = ref('');
 const twitter = ref('');
@@ -31,14 +33,22 @@ const linkedin = ref('');
 
 const sendMessage = async () => {
   try {
-    const response = await axios.post('/api/', {
+    await axios.post('/api/', {
       message: message.value
     });
-    console.log('Message sent:', response.data);
   } catch (error) {
     console.error('Error sending message:', error);
   }
 };
+
+onMounted(() => {
+  socket.on('message', (message: string) => {
+    message = JSON.parse(message);
+    twitter.value = message.twitter;
+    linkedin.value = message.linkedin;
+  });
+});
+
 </script>
 
 <style scoped>

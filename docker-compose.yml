@@ -36,6 +36,16 @@ services:
     networks:
       - socialMediaManagerNetwork
     depends_on:
+      - messageBroker  
+  
+  socket:
+    build: ./services/socket
+    volumes:
+      - ./services/socket:/services/socket
+      - ./services/utils:/services/socket/utils
+    networks:
+      - socialMediaManagerNetwork
+    depends_on:
       - messageBroker
 
   formatter:

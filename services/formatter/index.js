@@ -5,17 +5,24 @@ const RabbitMQProducer = require('./utils/RabbitMQProducer');
 let rabbitMQProducer = new RabbitMQProducer();
 
 async function formatForTwitter(message) {
-  await rabbitMQProducer.sendMessage('twitter', "message formatted for twitter: " + message);
+  return "message formatted for twitter: " + message;
 }
 
 async function formatForLinkedin(message) {
-  await rabbitMQProducer.sendMessage('linkedin', "message formatted for linkedin: " + message);
+  return "message formatted for linkedin: " + message;
+}
+
+async function formatMessage(message) {
+  let messages = {
+    twitter : await formatForTwitter(message),
+    linkedin : await formatForLinkedin(message),
+  }
+  rabbitMQProducer.sendMessage('formattedMessages', JSON.stringify(messages));
 }
 
 (async () => {
   await rabbitmqListener.listenToQueue('formatter', (message) => {
     console.log('Received message:', message);
-    formatForTwitter(message);
-    formatForLinkedin(message);
+    formatMessage(message);
   });
 })();
