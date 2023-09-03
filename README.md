@@ -8,6 +8,8 @@ Welcome to our innovative project, an all-inclusive web application designed to 
 
 We are excited to introduce an innovative endeavor aimed at transforming the landscape of social media management. Our primary objective is to seamlessly integrate a variety of social media APIs into a unified solution, consolidating the management of multiple social media channels within a single, robust application.
 
+![Alt text](socialMediaManager.png?raw=true "Social Media Manager")
+
 ## The Vision
 
 Imagine a powerful web app that empowers you to efficiently oversee your presence across a plethora of social media platforms. Our app's core functionality revolves around automating tasks such as cross-platform content reposting, complete with AI-driven formatting adjustments tailored for each specific platform. By leveraging APIs from different social media platforms, our app becomes the centralized hub for managing all your accounts.
