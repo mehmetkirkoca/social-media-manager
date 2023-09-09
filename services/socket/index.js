@@ -3,8 +3,8 @@ const RabbitMQListener = require('./utils/RabbitMQListener');
 const EventEmitter = require('events');
 const socketEmitter = new EventEmitter();
 
-const rabbitmqListener = new RabbitMQListener();
-rabbitmqListener.listenToQueue('formattedMessages', (messages) => {
+const rabbitMQListener = new RabbitMQListener();
+rabbitMQListener.listenToQueue('formattedMessages', (messages) => {
   console.log('Received formatted Messages:', messages);
   socketEmitter.emit('formattedMessages', messages);
 });

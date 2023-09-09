@@ -1,5 +1,5 @@
 const RabbitMQListener = require('./utils/RabbitMQListener');
-const rabbitmqListener = new RabbitMQListener();
+const rabbitMQListener = new RabbitMQListener();
 
 const RabbitMQProducer = require('./utils/RabbitMQProducer');
 let rabbitMQProducer = new RabbitMQProducer();
@@ -21,7 +21,7 @@ async function formatMessage(message) {
 }
 
 (async () => {
-  await rabbitmqListener.listenToQueue('formatter', (message) => {
+  await rabbitMQListener.listenToQueue('formatter', (message) => {
     console.log('Received message:', message);
     formatMessage(message);
   });

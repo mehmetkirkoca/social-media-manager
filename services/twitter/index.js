@@ -1,8 +1,8 @@
 const RabbitMQListener = require('./utils/RabbitMQListener');
-const rabbitmqListener = new RabbitMQListener();
+const rabbitMQListener = new RabbitMQListener();
 
 (async () => {
-  await rabbitmqListener.listenToQueue('twitter', (message) => {
+  await rabbitMQListener.listenToQueue('twitter', (message) => {
     console.log('Received message:', message);
   });
 })();

@@ -1,10 +1,11 @@
 {
-    "name": "twitter-service",
+    "name": "formatter-service",
     "version": "1.0.0",
     "description": "",
     "main": "index.js",
     "scripts": {
-        "start": "nodemon index.js"
+        "start": "nodemon index.js",
+        "test": "jest --forceExit"
     },
     "dependencies": {
         "amqplib": "^0.10.3",
@@ -12,5 +13,9 @@
     },
     "engines": {
         "node": ">=12.0.0"
+    },
+    "devDependencies": {
+        "jest": "^29.6.4",
+        "rewire": "^7.0.0"
     }
 }

@@ -7,6 +7,10 @@ class RabbitMQListener {
 
   async connect() { 
     await this.rabbitmqConnector.connect();
+  }  
+  
+  async disconnect() { 
+    await this.rabbitmqConnector.disconnect();
   }
 
   async consumeFromQueue(queueName, callback) {

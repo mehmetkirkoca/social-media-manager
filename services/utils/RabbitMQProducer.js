@@ -11,6 +11,10 @@ class RabbitMQProducer {
     this.rabbitmqConnector.connect();
   }
 
+  async disconnect() { 
+    await this.rabbitmqConnector.disconnect();
+  }
+
   async publishToQueue(queueName, message) {
     try {
       await this.rabbitmqConnector.channel.assertQueue(queueName, { durable: true });
