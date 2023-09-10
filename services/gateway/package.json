@@ -2,9 +2,10 @@
     "name": "api-gateway",
     "version": "1.0.0",
     "description": "",
-    "main": "index.js",
+    "main": "start.js",
     "scripts": {
-        "start": "nodemon index.js"
+        "start": "nodemon start.js",
+        "test": "jest --forceExit"
     },
     "dependencies": {
         "amqplib": "^0.10.3",
@@ -13,5 +14,9 @@
     },
     "engines": {
         "node": ">=12.0.0"
+    },
+    "devDependencies": {
+        "jest": "^29.6.4",
+        "supertest": "^6.3.3"
     }
 }

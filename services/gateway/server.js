@@ -1,21 +1,15 @@
-const fastify = require('fastify')();
+const app = require('fastify')();
 const RabbitMQProducer = require('./utils/RabbitMQProducer');
 let rabbitMQProducer = new RabbitMQProducer();
 
-fastify.post('/', async (request, reply) => {
+app.post('/', async (request, reply) => {
   try {
     await rabbitMQProducer.sendMessage('formatter', request.body.message);
-    reply.send({ status: 'Message Send' });
+    reply.send({ status: 'ok' });
   } catch (error) {
     console.error('Error handling POST request:', error);
     reply.status(500).send({ error: 'Internal Server Error' });
   }
 });
 
-fastify.listen(8084, 'gateway', (err, address) => {
-  if (err) {
-    console.error(err);
-    process.exit(1);
-  }
-  console.log(`Gateway api service workin on ${address}`);
-});
+module.exports = app;

@@ -8,7 +8,7 @@ class RabbitMQProducer {
 
   async connect() {
     this.rabbitmqConnector = new RabbitMQConnector();
-    this.rabbitmqConnector.connect();
+    await this.rabbitmqConnector.connect();
   }
 
   async disconnect() { 
@@ -16,6 +16,9 @@ class RabbitMQProducer {
   }
 
   async publishToQueue(queueName, message) {
+    if(this.rabbitmqConnector.channel === null) {
+      await this.connect();
+    }
     try {
       await this.rabbitmqConnector.channel.assertQueue(queueName, { durable: true });
       this.rabbitmqConnector.channel.sendToQueue(queueName, Buffer.from(message));
