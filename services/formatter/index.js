@@ -13,11 +13,38 @@ async function formatForLinkedin(message) {
 }
 
 async function formatMessage(message) {
-  let messages = {
-    twitter : await formatForTwitter(message),
-    linkedin : await formatForLinkedin(message),
+  if (message === null || message === undefined) {
+    return;
   }
-  rabbitMQProducer.sendMessage('formattedMessages', JSON.stringify(messages));
+
+  let messages = {
+    twitter : '',
+    linkedin: ''
+  };
+
+  try {
+    // Use Promise.all to concurrently format the message for Twitter and LinkedIn
+    [messages.twitter, messages.linkedin] = await Promise.all([
+      formatForTwitter(message).catch(error => {
+        console.error('Error formatting for Twitter:', error);
+        return null;
+      }),
+      formatForLinkedin(message).catch(error => {
+        console.error('Error formatting for LinkedIn:', error);
+        return null;
+      })
+    ]);
+    
+  } catch (error) {
+    // Handle any errors that occur during the formatting process
+    console.error('Error formatting message:', error);
+  }
+
+  try {
+    rabbitMQProducer.sendMessage('formattedMessages', JSON.stringify(messages));
+  } catch (error) {
+    console.error('Error sending message:', error);
+  }
 }
 
 (async () => {
