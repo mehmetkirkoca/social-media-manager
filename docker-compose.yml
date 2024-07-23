@@ -32,7 +32,7 @@ services:
     build: ./services/gateway
     volumes:
       - ./services/gateway:/services/gateway
-      - ./services/utils:/services/gateway/utils
+      - rabbitmq-utils:/services/gateway/utils
     networks:
       - socialMediaManagerNetwork
     depends_on:
@@ -42,7 +42,7 @@ services:
     build: ./services/socket
     volumes:
       - ./services/socket:/services/socket
-      - ./services/utils:/services/socket/utils
+      - rabbitmq-utils:/services/socket/utils
     networks:
       - socialMediaManagerNetwork
     depends_on:
@@ -52,7 +52,7 @@ services:
     build: ./services/formatter
     volumes:
       - ./services/formatter:/services/formatter
-      - ./services/utils:/services/formatter/utils
+      - rabbitmq-utils:/services/formatter/utils
     restart: unless-stopped
     networks:
       - socialMediaManagerNetwork
@@ -63,7 +63,7 @@ services:
     build: ./services/twitter
     volumes:
       - ./services/twitter:/services/twitter
-      - ./services/utils:/services/twitter/utils
+      - rabbitmq-utils:/services/twitter/utils
     restart: unless-stopped
     networks:
       - socialMediaManagerNetwork
@@ -74,7 +74,7 @@ services:
     build: ./services/linkedin
     volumes:
       - ./services/linkedin:/services/linkedin
-      - ./services/utils:/services/linkedin/utils
+      - rabbitmq-utils:/services/linkedin/utils
     restart: unless-stopped
     networks:
       - socialMediaManagerNetwork
@@ -89,6 +89,15 @@ services:
       - socialMediaManagerNetwork
     depends_on:
       - gateway
+
+volumes:
+  rabbitmq-utils:
+    name: "rabbitmq-utils-volume"
+    driver: local
+    driver_opts:
+      type: 'none'
+      o: 'bind'
+      device: '${PWD}/services/utils'
 
 networks:
   socialMediaManagerNetwork:

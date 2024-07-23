@@ -2,11 +2,10 @@ FROM node:current-alpine3.17
 
 RUN apk update && apk add sudo
 
-WORKDIR /app/ui
-
 COPY package*.json ./
-
 RUN npm install
+
+WORKDIR /app/ui
 
 COPY . .
 
