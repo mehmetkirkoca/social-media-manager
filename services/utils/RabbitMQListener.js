@@ -36,16 +36,25 @@ class RabbitMQListener {
       });
   
       console.log(`Listening for messages on queue "${queueName}"`);
+      return true;
     } catch (error) {
       console.error('Error consuming messages:', error.message);
+      return false;
     }
   }
 
   async listenToQueue(queueName, callback) {
     try {
-      await this.consumeFromQueue(queueName, async (message) => {
+      let connected = await this.consumeFromQueue(queueName, async (message) => {
         await callback(message);
       });
+      // retry with timer if failed
+      if(!connected) {  
+        setTimeout(() => {
+          this.listenToQueue(queueName, callback);
+        }, 5000);
+      }
+
     } catch (error) {
       console.error('Error while listening:', error.message);
     }

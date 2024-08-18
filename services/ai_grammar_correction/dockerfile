@@ -1,0 +1,13 @@
+# Use an official Python runtime as a parent image
+FROM python:3.9-slim
+
+COPY . /services/grammar_correction
+
+# Set the working directory in the container
+WORKDIR /services/grammar_correction
+
+# Install dependencies
+RUN python -m pip install pika --upgrade
+RUN pip install happytransformer
+
+CMD ["python", "app.py"]

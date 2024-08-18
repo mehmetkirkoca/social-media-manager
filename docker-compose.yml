@@ -16,23 +16,33 @@ services:
       - ui
 
   messageBroker:
-    image: rabbitmq:management
-    environment:
-      RABBITMQ_DEFAULT_USER: username
-      RABBITMQ_DEFAULT_PASS: password
     container_name: messageBroker
+    image: rabbitmq:management
     restart: unless-stopped
     ports:
       - 5672:5672
       - 15672:15672
+    environment:
+      RABBITMQ_DEFAULT_USER: username
+      RABBITMQ_DEFAULT_PASS: password
     networks:
       - socialMediaManagerNetwork
+
+  ai-grammer-correction:
+    build: ./services/ai_grammar_correction
+    volumes:
+      - ./services/ai_grammar_correction:/services/grammar_correction
+    networks:
+      - socialMediaManagerNetwork
+    depends_on:
+      - messageBroker
+    command: tail -f /dev/null
 
   gateway:
     build: ./services/gateway
     volumes:
+      - ./services/utils:/services/gateway/utils
       - ./services/gateway:/services/gateway
-      - rabbitmq-utils:/services/gateway/utils
     networks:
       - socialMediaManagerNetwork
     depends_on:
@@ -41,8 +51,8 @@ services:
   socket:
     build: ./services/socket
     volumes:
+      - ./services/utils:/services/socket/utils
       - ./services/socket:/services/socket
-      - rabbitmq-utils:/services/socket/utils
     networks:
       - socialMediaManagerNetwork
     depends_on:
@@ -51,8 +61,8 @@ services:
   formatter:
     build: ./services/formatter
     volumes:
+      - ./services/utils:/services/formatter/utils
       - ./services/formatter:/services/formatter
-      - rabbitmq-utils:/services/formatter/utils
     restart: unless-stopped
     networks:
       - socialMediaManagerNetwork
@@ -62,8 +72,8 @@ services:
   twitter:
     build: ./services/twitter
     volumes:
+      - ./services/utils:/services/twitter/utils
       - ./services/twitter:/services/twitter
-      - rabbitmq-utils:/services/twitter/utils
     restart: unless-stopped
     networks:
       - socialMediaManagerNetwork
@@ -73,8 +83,8 @@ services:
   linkedin:
     build: ./services/linkedin
     volumes:
+      - ./services/utils:/services/linkedin/utils
       - ./services/linkedin:/services/linkedin
-      - rabbitmq-utils:/services/linkedin/utils
     restart: unless-stopped
     networks:
       - socialMediaManagerNetwork
@@ -89,15 +99,6 @@ services:
       - socialMediaManagerNetwork
     depends_on:
       - gateway
-
-volumes:
-  rabbitmq-utils:
-    name: "rabbitmq-utils-volume"
-    driver: local
-    driver_opts:
-      type: 'none'
-      o: 'bind'
-      device: '${PWD}/services/utils'
 
 networks:
   socialMediaManagerNetwork:

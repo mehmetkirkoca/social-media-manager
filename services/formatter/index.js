@@ -48,8 +48,13 @@ async function formatMessage(message) {
 }
 
 (async () => {
-  await rabbitMQListener.listenToQueue('formatter', (message) => {
-    console.log('Received message:', message);
+  rabbitMQListener.listenToQueue('fixedGrammar', (message) => {
+    console.log('Received message from fixedGrammar ', message);
     formatMessage(message);
+  });
+  rabbitMQListener.listenToQueue('formatter', (message) => {
+    console.log('Received message formatter:', message);
+    console.log('Sending for fixing grammar:', message);
+    rabbitMQProducer.sendMessage('fixGrammar', JSON.stringify({message: message}));
   });
 })();
