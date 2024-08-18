@@ -43,6 +43,6 @@ Here's a quick guide on how to set up and run the project using Docker commands:
 1. Clone the repository to your local machine.
 2. Navigate to the project directory.
 3. Run `docker-compose up` to start the microservices, frontend, and backend.
-4. Access the application by opening your web browser and navigating to the specified URL.
+4. Access the application by opening your web browser and navigating to the [specified URL](http://localhost:8081).
 
 Your enthusiasm and involvement in this project are immensely appreciated. Let's collaborate to revolutionize social media management, one commit at a time!
