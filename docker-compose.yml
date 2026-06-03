@@ -6,6 +6,7 @@ services:
       - "8081:80"
     volumes:
       - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - media_uploads:/media:ro
     networks:
       - socialMediaManagerNetwork
     depends_on:
@@ -66,10 +67,13 @@ services:
       - ./services/utils:/services/gateway/utils
       - ./services/gateway:/services/gateway
       - gateway_modules:/services/gateway/node_modules
+      - media_uploads:/uploads
+    env_file: .env
     networks:
       - socialMediaManagerNetwork
     depends_on:
       - messageBroker
+      - mongodb
 
   socket:
     build: ./services/socket
@@ -150,6 +154,62 @@ services:
       - messageBroker
       - mongodb
 
+  instagram:
+    build:
+      context: ./services
+      dockerfile: instagram/Dockerfile
+    volumes:
+      - instagram_modules:/services/instagram/node_modules
+    restart: unless-stopped
+    env_file: .env
+    networks:
+      - socialMediaManagerNetwork
+    depends_on:
+      - messageBroker
+      - mongodb
+
+  facebook:
+    build:
+      context: ./services
+      dockerfile: facebook/Dockerfile
+    volumes:
+      - facebook_modules:/services/facebook/node_modules
+    restart: unless-stopped
+    env_file: .env
+    networks:
+      - socialMediaManagerNetwork
+    depends_on:
+      - messageBroker
+      - mongodb
+
+  pinterest:
+    build:
+      context: ./services
+      dockerfile: pinterest/Dockerfile
+    volumes:
+      - pinterest_modules:/services/pinterest/node_modules
+    restart: unless-stopped
+    env_file: .env
+    networks:
+      - socialMediaManagerNetwork
+    depends_on:
+      - messageBroker
+      - mongodb
+
+  tiktok:
+    build:
+      context: ./services
+      dockerfile: tiktok/Dockerfile
+    volumes:
+      - tiktok_modules:/services/tiktok/node_modules
+    restart: unless-stopped
+    env_file: .env
+    networks:
+      - socialMediaManagerNetwork
+    depends_on:
+      - messageBroker
+      - mongodb
+
   feed-aggregator:
     build:
       context: ./services
@@ -167,6 +227,10 @@ services:
       - linkedin
       - mastodon
       - bluesky
+      - instagram
+      - pinterest
+      - tiktok
+      - facebook
 
   scheduler:
     build:
@@ -181,6 +245,19 @@ services:
     depends_on:
       - mongodb
       - redis
+
+  # ── Optional: Ollama local AI ─────────────────────────────────────────────────
+  # Uncomment to run Ollama inside Docker (CPU only).
+  # For GPU acceleration, add a `deploy.resources.reservations.devices` block.
+  # After starting, pull a model:  docker exec -it ollama ollama pull llama3.2
+  # ollama:
+  #   image: ollama/ollama:latest
+  #   container_name: ollama
+  #   restart: unless-stopped
+  #   volumes:
+  #     - ollama-data:/root/.ollama
+  #   networks:
+  #     - socialMediaManagerNetwork
 
   ui:
     build: ./ui
@@ -199,6 +276,8 @@ networks:
 volumes:
   mongodb-data:
   redis-data:
+  media_uploads:
+  ollama-data:
   gateway_modules:
   socket_modules:
   formatter_modules:
@@ -206,6 +285,10 @@ volumes:
   linkedin_modules:
   mastodon_modules:
   bluesky_modules:
+  instagram_modules:
+  facebook_modules:
+  pinterest_modules:
+  tiktok_modules:
   feed_aggregator_modules:
   scheduler_modules:
   ui_modules:

@@ -1,0 +1,17 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(dir \"d:\\\\GIT_REPO\\\\social-media-manager\\\\services\\\\gateway\" /s /b)",
+      "Bash(sed -n '110,155p' d:/GIT_REPO/social-media-manager/services/facebook/index.js)",
+      "Bash(sed -n '85,125p' d:/GIT_REPO/social-media-manager/services/mastodon/index.js)",
+      "Bash(sed -n '90,130p' d:/GIT_REPO/social-media-manager/services/bluesky/index.js)",
+      "PowerShell(cd d:\\\\GIT_REPO\\\\social-media-manager && \\(Get-Content services/gateway/server.js\\).Count)",
+      "PowerShell(cd d:\\\\GIT_REPO\\\\social-media-manager && \\(Get-Content services/scheduler/index.js\\).Count)",
+      "PowerShell(cd d:\\\\GIT_REPO\\\\social-media-manager && \\(Get-Content ui/src/locales/en.ts\\).Count)",
+      "PowerShell(cd d:\\\\GIT_REPO\\\\social-media-manager && \\(Get-Content ui/src/locales/tr.ts\\).Count)",
+      "Bash(gh api *)",
+      "Bash(where gh *)",
+      "Bash(gh --version)"
+    ]
+  }
+}

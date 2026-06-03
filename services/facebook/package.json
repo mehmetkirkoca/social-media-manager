@@ -1,0 +1,20 @@
+{
+  "name": "facebook-service",
+  "version": "1.0.0",
+  "description": "Facebook Graph API platform service",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "nodemon index.js"
+  },
+  "dependencies": {
+    "axios": "^1.6.7",
+    "fastify": "^4.24.3",
+    "mongodb": "^6.3.0",
+    "amqplib": "^0.10.3",
+    "dotenv": "^16.3.1"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.2"
+  }
+}

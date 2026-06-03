@@ -1,4 +1,7 @@
 const { MongoClient } = require('mongodb');
+const { createLogger } = require('./logger');
+
+const log = createLogger('mongodb');
 
 const MONGODB_URL = process.env.MONGODB_URL || 'mongodb://mongodb:27017';
 const DB_NAME = process.env.MONGODB_DB || 'socialmedia';
@@ -12,7 +15,7 @@ async function connect() {
   client = new MongoClient(MONGODB_URL);
   await client.connect();
   db = client.db(DB_NAME);
-  console.log(`[MongoDB] Connected to ${DB_NAME}`);
+  log.info({ action: 'connect', outcome: 'success', database: DB_NAME });
   return db;
 }
 
@@ -26,7 +29,7 @@ async function disconnect() {
     await client.close();
     client = null;
     db = null;
-    console.log('[MongoDB] Disconnected');
+    log.info({ action: 'disconnect', outcome: 'success' });
   }
 }
 

@@ -117,7 +117,7 @@ class TwitterService extends BasePlatformService {
         );
       }
     } catch (err) {
-      console.error('[Twitter] MongoDB write error:', err.message);
+      this.app.log.error({ action: 'feed_write', platform: 'twitter', outcome: 'failure', err: err.message });
     }
 
     return items;

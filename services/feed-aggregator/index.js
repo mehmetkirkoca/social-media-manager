@@ -4,27 +4,35 @@ const axios = require('axios');
 const cron = require('node-cron');
 const { getDb } = require('./utils/MongoDBConnector');
 const RabbitMQProducer = require('./utils/RabbitMQProducer');
+const { createLogger } = require('./utils/logger');
 
-const FEED_REFRESH_INTERVAL = process.env.FEED_REFRESH_INTERVAL || '*/5 * * * *'; // Her 5 dakika
+const FEED_REFRESH_INTERVAL = process.env.FEED_REFRESH_INTERVAL || '*/5 * * * *';
 
-// Platform servis URL'leri (docker network içinde)
 const PLATFORM_SERVICES = {
-  twitter:  process.env.TWITTER_SERVICE_URL  || 'http://twitter:3001',
-  linkedin: process.env.LINKEDIN_SERVICE_URL || 'http://linkedin:3002',
-  mastodon: process.env.MASTODON_SERVICE_URL || 'http://mastodon:3003',
-  bluesky:  process.env.BLUESKY_SERVICE_URL  || 'http://bluesky:3004',
+  twitter:   process.env.TWITTER_SERVICE_URL   || 'http://twitter:3001',
+  linkedin:  process.env.LINKEDIN_SERVICE_URL  || 'http://linkedin:3002',
+  mastodon:  process.env.MASTODON_SERVICE_URL  || 'http://mastodon:3003',
+  bluesky:   process.env.BLUESKY_SERVICE_URL   || 'http://bluesky:3004',
+  instagram: process.env.INSTAGRAM_SERVICE_URL || 'http://instagram:3005',
+  facebook:  process.env.FACEBOOK_SERVICE_URL  || 'http://facebook:3006',
+  pinterest: process.env.PINTEREST_SERVICE_URL || 'http://pinterest:3008',
+  tiktok:    process.env.TIKTOK_SERVICE_URL    || 'http://tiktok:3007',
 };
 
-const app = Fastify({ logger: false });
+const log = createLogger('feed-aggregator');
+const app = Fastify({ logger: log });
 let producer;
 
 // ─── Feed Çekme ──────────────────────────────────────────────────────────────
 
-async function fetchPlatformFeed(platform, serviceUrl) {
+async function fetchPlatformFeed(platform, serviceUrl, workspaceId = 'default') {
   try {
-    const response = await axios.get(`${serviceUrl}/feed`, { timeout: 15000 });
+    const response = await axios.get(`${serviceUrl}/feed`, {
+      timeout: 15000,
+      headers: { 'X-Workspace-Id': workspaceId },
+    });
     const items = response.data.items || [];
-    console.log(`[FeedAggregator] ${platform}: ${items.length} öğe çekildi`);
+    log.info({ action: 'feed_fetch', platform, count: items.length, outcome: 'success' });
 
     // WebSocket üzerinden UI'ya bildir
     if (producer && items.length > 0) {
@@ -33,13 +41,13 @@ async function fetchPlatformFeed(platform, serviceUrl) {
 
     return items;
   } catch (err) {
-    console.error(`[FeedAggregator] ${platform} feed hatası:`, err.message);
+    log.error({ action: 'feed_fetch', platform, outcome: 'failure', err: err.message });
     return [];
   }
 }
 
 async function fetchAllFeeds() {
-  console.log('[FeedAggregator] Tüm platformlardan feed çekiliyor...');
+  log.info({ action: 'feed_fetch_all' }, 'Fetching feeds from all platforms');
 
   const results = await Promise.allSettled(
     Object.entries(PLATFORM_SERVICES).map(([platform, url]) =>
@@ -52,7 +60,7 @@ async function fetchAllFeeds() {
     summary[platform] = results[i].status === 'fulfilled' ? results[i].value.length : 0;
   });
 
-  console.log('[FeedAggregator] Tamamlandı:', summary);
+  log.info({ action: 'feed_fetch_all', outcome: 'success', summary });
   return summary;
 }
 
@@ -62,8 +70,9 @@ app.get('/health', async () => ({ status: 'ok', service: 'feed-aggregator' }));
 
 app.post('/fetch', async (request) => {
   const { platform } = request.body || {};
+  const workspaceId = request.headers['x-workspace-id'] || 'default';
   if (platform && PLATFORM_SERVICES[platform]) {
-    const items = await fetchPlatformFeed(platform, PLATFORM_SERVICES[platform]);
+    const items = await fetchPlatformFeed(platform, PLATFORM_SERVICES[platform], workspaceId);
     return { success: true, platform, count: items.length };
   }
   const summary = await fetchAllFeeds();
@@ -72,10 +81,12 @@ app.post('/fetch', async (request) => {
 
 app.get('/feeds', async (request) => {
   const { platform, tag, limit = 50, skip = 0 } = request.query;
+  const workspaceId = request.headers['x-workspace-id'] || 'default';
   const db = await getDb();
   const col = db.collection('feeds');
 
-  const filter = {};
+  // Include legacy items without workspaceId (backwards compat)
+  const filter = { $or: [{ workspaceId }, { workspaceId: { $exists: false } }] };
   if (platform) filter.platform = platform;
   if (tag) filter.tags = tag;
 
@@ -89,10 +100,14 @@ app.get('/feeds', async (request) => {
   return { success: true, count: items.length, items };
 });
 
-app.get('/platform-status', async () => {
+app.get('/platform-status', async (request) => {
+  const workspaceId = request.headers['x-workspace-id'] || 'default';
   const statuses = await Promise.allSettled(
     Object.entries(PLATFORM_SERVICES).map(async ([platform, url]) => {
-      const response = await axios.get(`${url}/status`, { timeout: 5000 });
+      const response = await axios.get(`${url}/status`, {
+        timeout: 5000,
+        headers: { 'X-Workspace-Id': workspaceId },
+      });
       return { platform, ...response.data };
     })
   );
@@ -113,14 +128,14 @@ async function start() {
 
   // Periyodik feed yenileme
   cron.schedule(FEED_REFRESH_INTERVAL, () => {
-    fetchAllFeeds().catch(console.error);
+    fetchAllFeeds().catch((err) => log.error({ action: 'feed_fetch_all', outcome: 'failure', err: err.message }));
   });
 
   await app.listen({ port: process.env.PORT || 3010, host: '0.0.0.0' });
-  console.log(`[FeedAggregator] Started. Cron: ${FEED_REFRESH_INTERVAL}`);
+  log.info({ action: 'service_start', outcome: 'success', cronInterval: FEED_REFRESH_INTERVAL }, 'Feed aggregator started');
 
   // İlk çalıştırma
   setTimeout(() => fetchAllFeeds(), 5000);
 }
 
-start().catch(console.error);
+start().catch((err) => { log.error({ action: 'service_start', outcome: 'failure', err: err.message }); process.exit(1); });

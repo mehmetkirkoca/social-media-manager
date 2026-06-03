@@ -7,7 +7,7 @@ COPY . /services/grammar_correction
 WORKDIR /services/grammar_correction
 
 # Install dependencies
-RUN python -m pip install pika --upgrade
-RUN pip install happytransformer
+RUN pip install --upgrade pip && \
+    pip install pika happytransformer
 
 CMD ["python", "app.py"]

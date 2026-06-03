@@ -1,4 +1,7 @@
 const amqp = require('amqplib');
+const { createLogger } = require('./logger');
+
+const log = createLogger('rabbitmq');
 
 class RabbitMQConnector {
   constructor() {
@@ -10,9 +13,9 @@ class RabbitMQConnector {
     try {
       this.connection = await amqp.connect('amqp://username:password@messageBroker');
       this.channel = await this.connection.createChannel();
-      console.log('Connected to RabbitMQ');
+      log.info({ action: 'connect', outcome: 'success' });
     } catch (error) {
-      console.error('Error connecting to RabbitMQ:', error);
+      log.error({ action: 'connect', outcome: 'failure', err: error.message });
     }
   }
 
@@ -20,15 +23,15 @@ class RabbitMQConnector {
     try {
       if (this.channel) {
         await this.channel.close();
-        console.log('Channel closed');
+        log.info({ action: 'channel_close', outcome: 'success' });
       }
 
       if (this.connection) {
         await this.connection.close();
-        console.log('Connection closed');
+        log.info({ action: 'disconnect', outcome: 'success' });
       }
     } catch (error) {
-      console.error('Error disconnecting from RabbitMQ:', error);
+      log.error({ action: 'disconnect', outcome: 'failure', err: error.message });
       throw error;
     }
   }

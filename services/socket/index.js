@@ -1,21 +1,24 @@
 const socketIO = require('socket.io');
 const RabbitMQListener = require('./utils/RabbitMQListener');
 const EventEmitter = require('events');
+const { createLogger } = require('./utils/logger');
+
+const log = createLogger('socket');
 const socketEmitter = new EventEmitter();
 
 const rabbitMQListener = new RabbitMQListener();
 rabbitMQListener.listenToQueue('formattedMessages', (messages) => {
-  console.log('Received formatted Messages:', messages);
+  log.info({ action: 'message_received', queue: 'formattedMessages', outcome: 'success' });
   socketEmitter.emit('formattedMessages', messages);
 });
 
 const io = socketIO(8084);
 
 io.on('connection', (socket) => {
-  console.log('User Connected ' + socket.id);
+  log.info({ action: 'client_connect', socketId: socket.id });
 
   socket.on('disconnect', () => {
-    console.log('User Disconnected: ' + socket.id);
+    log.info({ action: 'client_disconnect', socketId: socket.id });
   });
 
   socketEmitter.on('formattedMessages', (messages) => {

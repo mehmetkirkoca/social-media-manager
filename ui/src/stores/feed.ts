@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import axios from 'axios'
+import { usePlatformsStore } from './platforms'
 
 export interface FeedItem {
   _id?: string
@@ -20,14 +21,30 @@ export interface FeedItem {
 export const useFeedStore = defineStore('feed', () => {
   const items = ref<FeedItem[]>([])
   const loading = ref(false)
-  const activePlatforms = ref<Set<string>>(new Set(['twitter', 'mastodon', 'bluesky', 'linkedin']))
+  const activePlatforms = ref<Set<string>>(new Set(['twitter', 'mastodon', 'bluesky', 'linkedin', 'instagram', 'facebook', 'pinterest', 'tiktok']))
+  const activePageIds = ref<Set<string>>(new Set())
+  const activeIgAccountIds = ref<Set<string>>(new Set())
   const activeTag = ref<string | null>(null)
   const searchQuery = ref('')
 
   const filteredItems = computed(() => {
+    const platformsStore = usePlatformsStore()
     return items.value.filter((item) => {
       if (!activePlatforms.value.has(item.platform)) return false
       if (activeTag.value && !item.tags.includes(activeTag.value)) return false
+
+      // Facebook page sub-filter (only when specific pages are selected)
+      if (item.platform === 'facebook' && activePageIds.value.size > 0) {
+        const activePages = platformsStore.connectedPages.filter((p) => activePageIds.value.has(p.id))
+        if (!activePages.some((p) => p.name === item.author.username || p.name === item.author.name)) return false
+      }
+
+      // Instagram account sub-filter (only when specific accounts are selected)
+      if (item.platform === 'instagram' && activeIgAccountIds.value.size > 0) {
+        const activeAccounts = platformsStore.connectedIgAccounts.filter((a) => activeIgAccountIds.value.has(a.id))
+        if (!activeAccounts.some((a) => a.username === item.author.username)) return false
+      }
+
       if (searchQuery.value) {
         const q = searchQuery.value.toLowerCase()
         return (
@@ -78,8 +95,18 @@ export const useFeedStore = defineStore('feed', () => {
     }
   }
 
+  function togglePage(pageId: string) {
+    if (activePageIds.value.has(pageId)) activePageIds.value.delete(pageId)
+    else activePageIds.value.add(pageId)
+  }
+
+  function toggleIgAccount(accountId: string) {
+    if (activeIgAccountIds.value.has(accountId)) activeIgAccountIds.value.delete(accountId)
+    else activeIgAccountIds.value.add(accountId)
+  }
+
   return {
-    items, loading, activePlatforms, activeTag, searchQuery,
-    filteredItems, fetchFeeds, refreshFeeds, addItem, togglePlatform,
+    items, loading, activePlatforms, activePageIds, activeIgAccountIds, activeTag, searchQuery,
+    filteredItems, fetchFeeds, refreshFeeds, addItem, togglePlatform, togglePage, toggleIgAccount,
   }
 })
